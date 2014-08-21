@@ -1,6 +1,8 @@
 package info.bowkett.mongostats;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jbowkett on 20/08/2014.
@@ -30,5 +32,9 @@ public class Region {
 
   public int getPopulationFor(int year) {
     return yearToPopulationMap.get(year);
+  }
+
+  public Set<Map.Entry<Integer, Integer>> populationEntries() {
+    return yearToPopulationMap.entrySet();
   }
 }

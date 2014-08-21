@@ -1,5 +1,11 @@
 package info.bowkett.mongostats;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 /**
@@ -7,8 +13,23 @@ import java.util.stream.Stream;
  */
 public class RegionsFactory {
 
-  public void createFromStream(Stream<String> lines) {
-    lines.forEach(line -> createFromLine(line));
+  public Collection<Region> createFromStream(Stream<String> lines) {
+    final ConcurrentMap<String, Region> regions = new ConcurrentHashMap<>();
+    lines.forEach(line -> {
+      final Region incoming = createFromLine(line);
+      //do merge if already a value for the region:
+      regions.computeIfPresent(incoming.getRegion(), (key,existingRegion) -> {
+        final Set<Map.Entry<Integer, Integer>> populationEntries = incoming.populationEntries();
+        populationEntries.forEach(entry -> {
+          final int year = entry.getKey();
+          final int population = entry.getValue();
+          existingRegion.insertPopulation(year, population);
+        });
+        return existingRegion;
+      });
+      regions.putIfAbsent(incoming.getRegion(), incoming);
+    });
+    return regions.values();
   }
 
 
