@@ -1,0 +1,20 @@
+2012,England,London,49141671
+2011,England,London,49140671
+2010,England,London,49140051
+2009,England,London,49139431
+2008,England,London,49138831
+2012,Northern Ireland,Belfast,1685529
+2011,Northern Ireland,Belfast,1685427
+2010,Northern Ireland,Belfast,1685327
+2009,Northern Ireland,Belfast,1685287
+2008,Northern Ireland,Belfast,1685267
+2012,Scotland,Edinburgh,5062938
+2011,Scotland,Edinburgh,5062638
+2010,Scotland,Edinburgh,5062423
+2009,Scotland,Edinburgh,5062211
+2008,Scotland,Edinburgh,5062011
+2012,Wales,Cardiff,2903085
+2011,Wales,Cardiff,2903285
+2010,Wales,Cardiff,2903185
+2009,Wales,Cardiff,2903135
+2008,Wales,Cardiff,2903085
