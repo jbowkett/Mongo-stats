@@ -87,6 +87,4 @@ public class RegionFactoryTest {
     regions.toArray(regionsAry);
     return regionsAry;
   }
-
-
 }
