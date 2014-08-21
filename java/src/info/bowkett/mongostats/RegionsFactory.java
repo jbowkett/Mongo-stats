@@ -13,6 +13,14 @@ import java.util.stream.Stream;
  */
 public class RegionsFactory {
 
+  /**
+   * Creates regions from a stream.  If called with a parallel stream, this
+   * method should still work.  Internally it makes use of a concurrent map
+   * as the api for only adding new values if previously absent makes the code
+   * easier to read, and has the added benefit of allowing for later multithreading
+   * @param lines
+   * @return
+   */
   public Collection<Region> createFromStream(Stream<String> lines) {
     final ConcurrentMap<String, Region> regions = new ConcurrentHashMap<>();
     lines.forEach(line -> {
