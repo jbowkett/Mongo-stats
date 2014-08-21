@@ -37,4 +37,14 @@ public class Region {
   public Set<Map.Entry<Integer, Integer>> populationEntries() {
     return yearToPopulationMap.entrySet();
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("Region{");
+    sb.append("country='").append(country).append('\'');
+    sb.append(", region='").append(region).append('\'');
+    sb.append(", yearToPopulationMap=").append(yearToPopulationMap);
+    sb.append('}');
+    return sb.toString();
+  }
 }
