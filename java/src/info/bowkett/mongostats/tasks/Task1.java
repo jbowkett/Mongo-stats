@@ -51,12 +51,13 @@ public class Task1 {
     final CommandLine cmdLine = new CommandLine();
     final Map<String, String> parsed = cmdLine.parse(args);
     if (valid(parsed)) {
+      MongoClient client = null;
       try {
         final String fileName = "input-data/data.txt";
         final String mongoUrl = mongoUrlFrom(parsed);
         System.out.println("Connecting to : " + mongoUrl);
         final MongoClientURI uri  = new MongoClientURI(mongoUrl);
-        final MongoClient client = new MongoClient(uri);
+        client = new MongoClient(uri);
         final Task1 task1 = new Task1(fileName, client, parsed.get(DB_SWITCH));
         task1.demonstrate();
       }
@@ -65,6 +66,9 @@ public class Task1 {
       }
       catch (UnknownHostException e) {
         e.printStackTrace();
+      }
+      finally {
+        if(client != null) client.close();
       }
     }
     else {
