@@ -13,7 +13,7 @@ import java.util.Collection;
 /**
  * Created by jbowkett on 20/08/2014.
  */
-public class Task1 {
+public class Task1 implements Task {
 
   private final String fileName;
   private final MongoClient mongoClient;
@@ -25,15 +25,21 @@ public class Task1 {
     this.dbName = dbName;
   }
 
-  public void demonstrate() throws FileNotFoundException {
-    System.out.println("Loading file...");
-    final FileReader inputFile = new FileReader(fileName);
-    final BufferedReader reader = new BufferedReader(inputFile);
-    final RegionsFactory factory = new RegionsFactory();
-    final Collection<Region> regions = factory.createFromStream(reader.lines());
-    System.out.println("File parsed.  Loading into DB...");
-    final Inserter inserter = new Inserter(mongoClient, dbName);
-    inserter.insertAll(regions.stream());
-    System.out.println("All documents loaded into DB.  Task 1 complete.");
+  @Override
+  public void demonstrate() {
+    try {
+      System.out.println("Loading file...");
+      final FileReader inputFile = new FileReader(fileName);
+      final BufferedReader reader = new BufferedReader(inputFile);
+      final RegionsFactory factory = new RegionsFactory();
+      final Collection<Region> regions = factory.createFromStream(reader.lines());
+      System.out.println("File parsed.  Loading into DB...");
+      final Inserter inserter = new Inserter(mongoClient, dbName);
+      inserter.insertAll(regions.stream());
+      System.out.println("All documents loaded into DB.  Task 1 complete.");
+    }
+    catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 }
