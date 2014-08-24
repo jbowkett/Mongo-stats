@@ -34,16 +34,6 @@ public class RegionDAO {
     collection.insert(mapped);
   }
 
-  public List<Region> allRegions() {
-    final DBCursor cursor = collection.find();
-    final List<Region> regions = new ArrayList<>();
-    while (cursor.hasNext()) {
-      final DBObject dbObject = cursor.next();
-      regions.add(codec.toRegion(dbObject));
-    }
-    return regions;
-  }
-
   /*
 db.regions_3.aggregate([
 { $unwind : "$populations" },
