@@ -1,25 +1,5 @@
 // task 3
 // persist this for each region
-db.regions_3.aggregate([
-    { $unwind : "$populations" },
-    { $match : {"populations.year": {$gt : 2008} } },
-    {
-      $project : {
-        _id : {
-          country : "$country",
-          region : "$region"
-        },
-        year : "$populations.year",
-        growth : "$populations.growth"
-      }
-    },
-    {
-        $group :{
-          _id : "$_id",
-          avg_growth : { $avg: "$growth" }
-        }
-    }
-])
 
 db.regions_3.aggregate([
     { $unwind : "$populations" },
@@ -51,6 +31,8 @@ db.regions_3.aggregate([
           region : "$region"
         },
         year : "$populations.year",
+        avg_growth : "$avg_growth",
+        annual_growth : "$populations.growth",
         deviation : { $subtract : ["$avg_growth", "$populations.growth"] }
       }
     },
@@ -58,6 +40,8 @@ db.regions_3.aggregate([
       $project : {
         _id : "$_id",
         year : "$year",
+        annual_growth : "$annual_growth",
+        avg_growth : "$avg_growth",
         absolute_deviation : {
            //had to use internet for this bit
            $cond: [
@@ -68,7 +52,7 @@ db.regions_3.aggregate([
         }
       }
     },
-    { $sort:{_id :1, absolute_deviation:1}  }
+    { $sort:{_id :1, absolute_deviation:-1}  }
 ])
 
 //then print the top 2 for each region

@@ -1,7 +1,6 @@
 package info.bowkett.mongostats;
 
 import com.mongodb.*;
-import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,26 +45,15 @@ public class RegionDAO {
   }
 
   /*
-  db.regions.aggregate([
-      { $unwind : "$populations" },
-      { $match : {"populations.year":2012} },
-      {
-        $project : {
-          _id : {
-            country : "$country",
-            region : "$region"
-          },
-          year : "$populations.year",
-          population : "$populations.population",
-          growth : "$populations.growth"
-        }
-      },
-      { $sort  : {"growth":-1} },
-      { $limit : 2}
-  ])
+db.regions_3.aggregate([
+{ $unwind : "$populations" },
+{ $match : {"populations.year":2012} },
+{ $sort  : {"populations.growth":-1} },
+{ $limit : 2}
+]);  ])
    */
   public List<Region> largestGrowth(int topNumberOfRegions, int year) {
-    final DBObject unwind = new BasicDBObject("$unwind", "$populations");
+    final DBObject unwind = unwindPopulation();
     final DBObject match  = new BasicDBObject("$match", new BasicDBObject("populations.year", year));
     final DBObject sort   = new BasicDBObject("$sort",  new BasicDBObject("populations.growth", -1));
     final DBObject limit  = new BasicDBObject("$limit", topNumberOfRegions);
@@ -85,10 +73,6 @@ public class RegionDAO {
       toReturn.add(e);
     }
     return toReturn;
-  }
-
-  public DBCollection getCollection() {
-    return collection;
   }
 
   /*
@@ -111,10 +95,9 @@ db.regions_3.aggregate([
 ])
    */
   public int setAverageGrowthForEachRegion() {
-
-    final DBObject unwind  = new BasicDBObject("$unwind", "$populations");
-    // exclude 2008 as there is no growth stat for the first year
-    final DBObject match   = new BasicDBObject("$match",  new BasicDBObject("populations.year", new BasicDBObject("$gt", 2008)));
+    final DBObject unwind = unwindPopulation();
+    // exclude 2008 as there is no population growth stat for the first year
+    final DBObject match   = excludeYear(2008);
     final DBObject project = new BasicDBObject("$project",new BasicDBObject("_id", 1).append("year", "$populations.year").append("growth", "$populations.growth"));
     final DBObject group   = new BasicDBObject("$group",  new BasicDBObject("_id", "$_id").append("avg_growth", new BasicDBObject("$avg", "$growth")));
 
@@ -133,5 +116,104 @@ db.regions_3.aggregate([
       return result.getMatchedCount();
     }
     return 0;
+  }
+
+  /*
+
+//  this query:
+db.regions_3.aggregate([
+    { $unwind : "$populations" },
+    { $match : {"populations.year" : {$gt:2008} }  },
+    {
+      $project : {
+        _id : {
+          country : "$country",
+          region : "$region"
+        },
+        year : "$populations.year",
+        avg_growth : "$avg_growth",
+        deviation : { $subtract : ["$avg_growth", "$populations.growth"] }
+      }
+    },
+    {
+      $project : {
+        _id : "$_id",
+        year : "$year",
+        avg_growth : "$avg_growth",
+        absolute_deviation : {
+           //had to lookup how to do absolute
+           $cond: [
+             { $lt: ['$deviation', 0] },
+             { $subtract: [0, '$deviation'] },
+             '$deviation'
+           ]
+        }
+      }
+    },
+    { $sort:{_id :1, absolute_deviation:-1}  }
+])
+   */
+  public void printDeviationGrowthForEachRegion() {
+    final DBObject unwind = unwindPopulation();
+    // exclude 2008 as there is no population growth stat for the first year
+    final DBObject match   = excludeYear(2008);
+    final DBObject deviation_projection = new BasicDBObject("$project",
+         new BasicDBObject("_id",
+             new BasicDBObject("country", "$country").append("region","$region")
+         ).append("year", "$populations.year").append("avg_growth", "$avg_growth").append("annual_growth", "$populations.growth")
+             .append("deviation", new BasicDBObject("$subtract", new String []{"$avg_growth", "$populations.growth"}))
+    );
+    final DBObject abs_deviation = new BasicDBObject("$project",
+         new BasicDBObject("_id","$_id").append("year", "$year").append("avg_growth", "$avg_growth").append("annual_growth", "$annual_growth")
+             .append("absolute_deviation",
+                 new BasicDBObject("$cond", new Object []{
+                     new BasicDBObject("$lt", new Object[] {"$deviation", 0}),
+                     new BasicDBObject("$subtract", new Object [] {0, "$deviation"}),
+                     "$deviation"
+                 }))
+    );
+    final DBObject sort   = new BasicDBObject("$sort",  new BasicDBObject("_id", 1).append("absolute_deviation", -1));
+    final List<DBObject> pipeline = Arrays.asList(unwind, match, deviation_projection, abs_deviation, sort);
+    final AggregationOutput output = collection.aggregate(pipeline);
+
+    int regionCount = 0;
+    String previousRegion = null;
+    for (DBObject result : output.results()) {
+      final DBObject id = (DBObject) result.get("_id");
+      final String country = (String) id.get("country");
+      final String region = (String) id.get("region");
+      final double averageGrowthForRegion = (double) result.get("avg_growth");
+      final int year = (Integer) result.get("year");
+      final int growthForYear = (Integer) result.get("annual_growth");
+      final double deviationFromMean = (Double) result.get("absolute_deviation");
+
+      if(newRegion(previousRegion, region)){
+        regionCount = 0;
+        previousRegion = region;
+      }
+
+      if(regionCount++ < 2){
+        final StringBuilder msg = new StringBuilder();
+        msg.append("In ").append(year).append(", in ").append(region).append(", ")
+            .append(country).append(" the population grew by ")
+            .append(growthForYear).append(" which is an absolute deviation of ")
+            .append(deviationFromMean)
+            .append(" from the arithmetic mean population for the region for all years of ")
+            .append(averageGrowthForRegion);
+        System.out.println(msg);
+      }
+    }
+  }
+
+  public boolean newRegion(String previousRegion, String region) {
+    return previousRegion == null || !previousRegion.equals(region);
+  }
+
+  private BasicDBObject excludeYear(int year) {
+    return new BasicDBObject("$match",  new BasicDBObject("populations.year", new BasicDBObject("$gt", year)));
+  }
+
+  private DBObject unwindPopulation() {
+    return new BasicDBObject("$unwind", "$populations");
   }
 }

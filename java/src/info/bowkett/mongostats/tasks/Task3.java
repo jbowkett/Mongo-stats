@@ -23,8 +23,9 @@ public class Task3 implements Task {
   public void demonstrate() {
 
     final int recordsUpdated = regionDao.setAverageGrowthForEachRegion();
-    System.out.println(recordsUpdated + "records updated with average growth");
+    System.out.println(recordsUpdated + " documents updated with average population growth");
 
+    regionDao.printDeviationGrowthForEachRegion();
     System.out.println("Task 3 complete.");
   }
 }
