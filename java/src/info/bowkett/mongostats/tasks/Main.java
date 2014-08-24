@@ -3,6 +3,8 @@ package info.bowkett.mongostats.tasks;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import info.bowkett.mongostats.CommandLine;
+import info.bowkett.mongostats.RegionDAO;
+import info.bowkett.mongostats.RegionsFactory;
 
 import java.net.UnknownHostException;
 import java.util.AbstractSequentialList;
@@ -51,9 +53,10 @@ public class Main {
   public static AbstractSequentialList<Task> getTasks(Map<String, String> parsed, MongoClient client) {
     final AbstractSequentialList<Task> tasks = new LinkedList<>();
     final String taskName = parsed.get(TASK_SWITCH);
+    final RegionDAO regionDao = new RegionDAO(client, parsed.get(DB_SWITCH));
     if(taskName.matches("1|ALL")){
       final String fileName = "input-data/data.txt";
-      tasks.add(new Task1(fileName, client, parsed.get(DB_SWITCH)));
+      tasks.add(new Task1(fileName, regionDao, new RegionsFactory()));
     }
     if(taskName.matches("2|ALL")) {
       tasks.add(null);

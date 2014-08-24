@@ -13,13 +13,13 @@ import java.util.stream.Stream;
 /**
  * Created by jbowkett on 20/08/2014.
  */
-public class Inserter {
+public class RegionDAO {
   private static final String COLLECTION_NAME = "regions_3";
   private final MongoClient mongoClient;
   private final DB db;
   private final DBCollection collection;
 
-  public Inserter(MongoClient mongoClient, String database) {
+  public RegionDAO(MongoClient mongoClient, String database) {
     this.mongoClient = mongoClient;
     db = mongoClient.getDB(database);
     collection = db.getCollection(COLLECTION_NAME);

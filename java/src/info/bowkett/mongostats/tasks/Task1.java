@@ -1,7 +1,6 @@
 package info.bowkett.mongostats.tasks;
 
-import com.mongodb.MongoClient;
-import info.bowkett.mongostats.Inserter;
+import info.bowkett.mongostats.RegionDAO;
 import info.bowkett.mongostats.Region;
 import info.bowkett.mongostats.RegionsFactory;
 
@@ -16,13 +15,13 @@ import java.util.Collection;
 public class Task1 implements Task {
 
   private final String fileName;
-  private final MongoClient mongoClient;
-  private final String dbName;
+  private final RegionDAO regionDao;
+  private RegionsFactory regionsFactory;
 
-  public Task1(String fileName, MongoClient client, String dbName) {
+  public Task1(String fileName, RegionDAO regionDao, RegionsFactory regionsFactory) {
     this.fileName = fileName;
-    mongoClient = client;
-    this.dbName = dbName;
+    this.regionDao = regionDao;
+    this.regionsFactory = regionsFactory;
   }
 
   @Override
@@ -31,11 +30,9 @@ public class Task1 implements Task {
       System.out.println("Loading file...");
       final FileReader inputFile = new FileReader(fileName);
       final BufferedReader reader = new BufferedReader(inputFile);
-      final RegionsFactory factory = new RegionsFactory();
-      final Collection<Region> regions = factory.createFromStream(reader.lines());
+      final Collection<Region> regions = regionsFactory.createFromStream(reader.lines());
       System.out.println("File parsed.  Loading into DB...");
-      final Inserter inserter = new Inserter(mongoClient, dbName);
-      inserter.insertAll(regions.stream());
+      regionDao.insertAll(regions.stream());
       System.out.println("All documents loaded into DB.  Task 1 complete.");
     }
     catch (FileNotFoundException e) {
