@@ -3,6 +3,7 @@ package info.bowkett.mongostats.tasks;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import info.bowkett.mongostats.CommandLine;
+import info.bowkett.mongostats.RegionCodec;
 import info.bowkett.mongostats.RegionDAO;
 import info.bowkett.mongostats.RegionsFactory;
 
@@ -53,13 +54,13 @@ public class Main {
   public static AbstractSequentialList<Task> getTasks(Map<String, String> parsed, MongoClient client) {
     final AbstractSequentialList<Task> tasks = new LinkedList<>();
     final String taskName = parsed.get(TASK_SWITCH);
-    final RegionDAO regionDao = new RegionDAO(client, parsed.get(DB_SWITCH));
+    final RegionDAO regionDao = new RegionDAO(client, parsed.get(DB_SWITCH), new RegionCodec());
     if(taskName.matches("1|ALL")){
       final String fileName = "input-data/data.txt";
       tasks.add(new Task1(fileName, regionDao, new RegionsFactory()));
     }
     if(taskName.matches("2|ALL")) {
-      tasks.add(null);
+      tasks.add(new Task2(regionDao));
     }
     if(taskName.matches("3|ALL")) {
       tasks.add(null);
