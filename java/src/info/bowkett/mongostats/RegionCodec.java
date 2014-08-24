@@ -17,6 +17,7 @@ public class RegionCodec {
   private static final String YEAR = "year";
   private static final String POPULATION = "population";
   private static final String POPULATIONS = "populations";
+  private static final String GROWTH = "growth";
 
   protected DBObject toDBObject(Region r) {
     final DBObject mapped = new BasicDBObject();
@@ -25,8 +26,10 @@ public class RegionCodec {
     final List<BasicDBObject> populations = new ArrayList<>();
     r.populationEntries().forEach(entry -> {
       final BasicDBObject population = new BasicDBObject();
-      population.put(YEAR, entry.getKey());
+      final Integer year = entry.getKey();
+      population.put(YEAR, year);
       population.put(POPULATION, entry.getValue());
+      population.put(GROWTH, r.getPopulationChangeFor(year));
       populations.add(population);
     });
     mapped.put(POPULATIONS, populations);
