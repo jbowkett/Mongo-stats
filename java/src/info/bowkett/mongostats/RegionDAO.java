@@ -42,4 +42,8 @@ public class RegionDAO {
     }
     return regions;
   }
+
+  public void updatePopulationChange(Region region) {
+
+  }
 }

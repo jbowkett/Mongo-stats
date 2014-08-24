@@ -34,6 +34,15 @@ public class Region {
     return yearToPopulationMap.get(year);
   }
 
+  public int getPopulationChangeFor(int year) {
+    final Integer popForYear = yearToPopulationMap.get(year);
+    final Integer popForPrevYear = yearToPopulationMap.get(year - 1);
+    if(popForYear != null && popForPrevYear != null){
+      return popForYear - popForPrevYear;
+    }
+    return 0;
+  }
+
   public Set<Map.Entry<Integer, Integer>> populationEntries() {
     return yearToPopulationMap.entrySet();
   }

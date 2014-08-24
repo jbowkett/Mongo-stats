@@ -19,7 +19,7 @@ public class Task2 implements Task {
   public void demonstrate() {
     final List<Region> regions = regionDao.allRegions();
     for (Region region : regions) {
-      System.out.println(region);
+      regionDao.updatePopulationChange(region);
     }
   }
 }
