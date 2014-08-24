@@ -29,13 +29,12 @@ public class RegionDAO {
   }
 
   public void insert(Region r){
-    final BasicDBObject mapped = codec.toDBObject(r);
+    final DBObject mapped = codec.toDBObject(r);
     collection.insert(mapped);
   }
 
-
   public List<Region> allRegions() {
-    DBCursor cursor = collection.find();
+    final DBCursor cursor = collection.find();
     final List<Region> regions = new ArrayList<>();
     while (cursor.hasNext()){
       final DBObject dbObject = cursor.next();

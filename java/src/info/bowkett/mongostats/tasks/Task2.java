@@ -18,5 +18,8 @@ public class Task2 implements Task {
   @Override
   public void demonstrate() {
     final List<Region> regions = regionDao.allRegions();
+    for (Region region : regions) {
+      System.out.println(region);
+    }
   }
 }
