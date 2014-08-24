@@ -60,7 +60,7 @@ public class Main {
       tasks.add(new Task2(regionDao));
     }
     if(taskName.matches("3|ALL")) {
-      tasks.add(null);
+      tasks.add(new Task3(regionDao));
     }
     return tasks;
   }
