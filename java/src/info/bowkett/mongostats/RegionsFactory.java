@@ -15,7 +15,7 @@ public class RegionsFactory {
 
   /**
    * Creates regions from a stream.  If called with a parallel stream, this
-   * method should still work.  Internally it makes use of a concurrent map
+   * method should still work.  Internally it makes use of a concurrent toDBObject
    * as the api for only adding new values if previously absent makes the code
    * easier to read, and has the added benefit of allowing for later multithreading
    * @param lines

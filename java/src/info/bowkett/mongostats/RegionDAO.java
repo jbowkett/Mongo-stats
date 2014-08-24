@@ -29,7 +29,7 @@ public class RegionDAO {
   }
 
   public void insert(Region r){
-    final BasicDBObject mapped = codec.map(r);
+    final BasicDBObject mapped = codec.toDBObject(r);
     collection.insert(mapped);
   }
 

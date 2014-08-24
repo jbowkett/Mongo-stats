@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class RegionCodec {
 
-  protected BasicDBObject map(Region r) {
+  protected BasicDBObject toDBObject(Region r) {
     BasicDBObject mapped = new BasicDBObject();
     mapped.put("country", r.getCountry());
     mapped.put("region", r.getRegion());
