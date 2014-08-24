@@ -17,9 +17,14 @@ public class Task2 implements Task {
 
   @Override
   public void demonstrate() {
-    final List<Region> regions = regionDao.allRegions();
-    for (Region region : regions) {
-      regionDao.updatePopulationChange(region);
+    final int topNumberOfRegions = 2;
+    final int year = 2012;
+    final List<Region> regions = regionDao.largestGrowth(topNumberOfRegions, year);
+    System.out.println("Top "+topNumberOfRegions+" regions in order of greatest growth:");
+    for (int i = 0; i < regions.size(); i++) {
+      final Region region = regions.get(i);
+      System.out.println((i+1)+" - " + region.getRegion()+", "+region.getCountry());
     }
+    System.out.println("Task 2 complete.");
   }
 }

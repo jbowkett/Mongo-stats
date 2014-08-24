@@ -7,6 +7,7 @@
 //then print the results of the following query
 db.regions_3.aggregate([
     { $unwind : "$populations" },
+    { $match : {"populations.year":2012} },
     {
       $project : {
         _id : {
@@ -18,10 +19,15 @@ db.regions_3.aggregate([
         growth : "$populations.growth"
       }
     },
-    {
-      $match : {  $or: [{year:2011}, {year:2012}]    }
-    },
-    { $sort  : {"growth":1} },
+    { $sort  : {"growth":-1} },
     { $limit : 2}
 ])
 
+{       $project : {         _id : {           country : "$country",           region : "$region"         },         year : "$populations.year",         population : "$populations.population",         growth : "$populations.growth"       }     },
+
+db.regions_3.aggregate([
+{ $unwind : "$populations" },
+{ $match : {"populations.year":2012} },
+{ $sort  : {"populations.growth":-1} },
+{ $limit : 2}
+]);
