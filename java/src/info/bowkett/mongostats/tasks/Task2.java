@@ -20,7 +20,8 @@ public class Task2 implements Task {
     final int topNumberOfRegions = 2;
     final int year = 2012;
     final List<Region> regions = regionDao.largestGrowth(topNumberOfRegions, year);
-    System.out.println("Top "+topNumberOfRegions+" regions in order of greatest growth:");
+    System.out.println("Top "+topNumberOfRegions+" regions in order of greatest" +
+        " growth for " + year + ":");
     for (int i = 0; i < regions.size(); i++) {
       final Region region = regions.get(i);
       System.out.println((i+1)+" - " + region.getRegion()+", "+region.getCountry());
