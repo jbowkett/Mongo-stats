@@ -24,8 +24,10 @@ in `java/test`.
 The main program entry point is in `java/src/info/bowkett/mongostats/tasks/Main.java`, 
 the sections below outline how to navigate to the entry point for each separate task.
 
-The default database used is adthena when using the gradle tasks.  The program 
-uses a collection named regions.
+When using the gradle tasks, the default database used is adthena hosted on 
+localhost, listening on port 27017.  
+
+The program uses a collection named regions.
 
 The junit tests may be run by executing:
  `gradle test`
@@ -34,6 +36,7 @@ All tasks may be run in order
 `java  -jar build/libs/Mongo-stats-1.0.jar -h <mongo host> -pt <port> -d <mongo database> -t ALL`
 or
 `gradle build allTasks`
+
 
 Task One
 ========
@@ -69,6 +72,7 @@ The resulting document schema is as follows:
 
 The population growth is calculated prior to inserting the document into Mongo, 
 as this statistic helps in determining the output for the following tasks. 
+
 
 Task Two
 ========
