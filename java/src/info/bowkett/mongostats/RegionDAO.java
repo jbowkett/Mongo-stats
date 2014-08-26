@@ -2,9 +2,7 @@ package info.bowkett.mongostats;
 
 import com.mongodb.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -12,7 +10,7 @@ import java.util.stream.Stream;
  * Created by jbowkett on 20/08/2014.
  */
 public class RegionDAO {
-  private static final String COLLECTION_NAME = "regions_3";
+  private static final String COLLECTION_NAME = "regions";
   private final MongoClient mongoClient;
   private final RegionCodec codec;
   private final DB db;
@@ -143,7 +141,7 @@ db.regions_3.aggregate([
     { $sort:{_id :1, absolute_deviation:-1}  }
 ])
    */
-  public void printDeviationGrowthForEachRegion() {
+  public List<RegionMeanGrowthDeviation> printDeviationGrowthForEachRegion(int limit) {
     final DBObject unwind = unwindPopulation();
     // exclude 2008 as there is no population growth stat for the first year
     final DBObject match   = excludeYear(2008);
@@ -166,6 +164,7 @@ db.regions_3.aggregate([
     final List<DBObject> pipeline = Arrays.asList(unwind, match, deviation_projection, abs_deviation, sort);
     final AggregationOutput output = collection.aggregate(pipeline);
 
+    final AbstractSequentialList<RegionMeanGrowthDeviation> toReturn = new LinkedList<>();
     int regionCount = 0;
     String previousRegion = null;
     for (DBObject result : output.results()) {
@@ -176,26 +175,18 @@ db.regions_3.aggregate([
       final int year = (Integer) result.get("year");
       final int growthForYear = (Integer) result.get("annual_growth");
       final double deviationFromMean = (Double) result.get("absolute_deviation");
-
       if(newRegion(previousRegion, region)){
         regionCount = 0;
         previousRegion = region;
       }
-
-      if(regionCount++ < 2){
-        final StringBuilder msg = new StringBuilder();
-        msg.append("In ").append(year).append(", in ").append(region).append(", ")
-            .append(country).append(" the population grew by ")
-            .append(growthForYear).append(" which is an absolute deviation of ")
-            .append(deviationFromMean)
-            .append(" from the arithmetic mean population for the region for all years of ")
-            .append(averageGrowthForRegion);
-        System.out.println(msg);
+      if(regionCount++ < limit){
+        toReturn.add(new RegionMeanGrowthDeviation(country, region, averageGrowthForRegion, year, growthForYear, deviationFromMean));
       }
     }
+    return toReturn;
   }
 
-  public boolean newRegion(String previousRegion, String region) {
+  private boolean newRegion(String previousRegion, String region) {
     return previousRegion == null || !previousRegion.equals(region);
   }
 
