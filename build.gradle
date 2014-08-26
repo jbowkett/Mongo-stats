@@ -1,0 +1,69 @@
+apply plugin: 'java'
+apply plugin: 'application'
+mainClassName = "info.bowkett.mongostats.tasks.Main"
+ext {
+  mongoHost = "localhost"
+  mongoPort = 27017
+  mongoDB = "adthena"
+}
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+sourceSets {
+  main {
+    java {
+      srcDir 'java/src'
+    }
+  }
+  test {
+    java {
+      srcDir 'java/test'
+    }
+  }
+}
+
+jar {
+  from {
+      configurations.compile.collect {
+          it.isDirectory() ? it : zipTree(it)
+      }
+      configurations.runtime.collect {
+          it.isDirectory() ? it : zipTree(it)
+      }
+  }
+  manifest.attributes("Main-Class": mainClassName)
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'org.mongodb', name: 'mongo-java-driver', version: '2.12.3'
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task taskOne(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  main = mainClassName
+  args "-h", mongoHost, "-pt", mongoPort, "-d", mongoDB, "-t", 1
+}
+
+task taskTwo(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  main = mainClassName
+  args "-h", mongoHost, "-pt", mongoPort, "-d", mongoDB, "-t", 2
+}
+
+task taskThree(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  main = mainClassName
+  args "-h", mongoHost, "-pt", mongoPort, "-d", mongoDB, "-t", 3
+}
+
+task allTasks(type: JavaExec) {
+  classpath = sourceSets.main.runtimeClasspath
+  main = mainClassName
+  args "-h", mongoHost, "-pt", mongoPort, "-d", mongoDB, "-t", "ALL"
+}
