@@ -20,7 +20,7 @@ db.regions_3.aggregate([
 ])
 
 
-// do this query:
+// run this query:
 db.regions_3.aggregate([
     { $unwind : "$populations" },
     { $match : {"populations.year" : {$gt:2008} }  },
