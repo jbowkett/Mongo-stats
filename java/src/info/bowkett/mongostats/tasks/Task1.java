@@ -11,6 +11,8 @@ import java.util.Collection;
 
 /**
  * Created by jbowkett on 20/08/2014.
+ * Class to implement the following task:
+ * "Insert the source data provided into a MongoDB instance."
  */
 public class Task1 implements Task {
 
@@ -24,6 +26,11 @@ public class Task1 implements Task {
     this.regionsFactory = regionsFactory;
   }
 
+  /**
+   * Loads the input file name given in the constructor,
+   * uses the regions factory from the constructor to parse each line in turn
+   * and then inserts each document using the Region DAO
+   */
   @Override
   public void demonstrate() {
     try {

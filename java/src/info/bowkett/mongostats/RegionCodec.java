@@ -9,9 +9,12 @@ import java.util.List;
 
 /**
  * Created by jbowkett on 24/08/2014.
+ *
+ * Class to encode and decode regions to and from Mongo document representations.
  */
 public class RegionCodec {
 
+  /* document keys  */
   private static final String COUNTRY = "country";
   private static final String REGION = "region";
   private static final String YEAR = "year";
@@ -19,6 +22,11 @@ public class RegionCodec {
   private static final String POPULATIONS = "populations";
   private static final String GROWTH = "growth";
 
+  /**
+   * Encodes to db object from a Region
+   * @param r
+   * @return
+   */
   protected DBObject toDBObject(Region r) {
     final DBObject mapped = new BasicDBObject();
     mapped.put(COUNTRY, r.getCountry());
@@ -36,6 +44,11 @@ public class RegionCodec {
     return mapped;
   }
 
+  /**
+   * Encodes to a Region from a Mongo DB object
+   * @param dbObject
+   * @return
+   */
   protected Region toRegion(DBObject dbObject) {
     final Region region = new Region(dbObject.get(COUNTRY).toString(),
                                      dbObject.get(REGION).toString());

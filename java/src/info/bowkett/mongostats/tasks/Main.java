@@ -22,6 +22,13 @@ public class Main {
   private static final String PASS_SWITCH = "-pw";
   private static final String HELP_SWITCH = "-help";
 
+  /**
+   * Main entry point, parses command line and then creates tasks as appropriate
+   *  Accepted args are :
+   *  -t <1|2|3|ALL> -h <host> -pt <port> -d <database> [-u <username> -pw <password>]
+   *  username and password are optional, but if one is specified, both must be specified
+   * @param args of the form -t <1|2|3|ALL> -h <host> -pt <port> -d <database> [-u <username> -pw <password>]
+   */
   public static void main(String[] args) {
     final CommandLine cmdLine = new CommandLine();
     final Map<String, String> parsed = cmdLine.parse(args);
@@ -48,6 +55,11 @@ public class Main {
     }
   }
 
+  /**
+   * @param parsed
+   * @param client
+   * @return tasks in order to be run
+   */
   public static AbstractSequentialList<Task> getTasks(Map<String, String> parsed, MongoClient client) {
     final AbstractSequentialList<Task> tasks = new LinkedList<>();
     final String taskName = parsed.get(TASK_SWITCH);
@@ -83,11 +95,19 @@ public class Main {
     System.out.println("username and password are optional, but if one is specified, both must be specified");
   }
 
+  /**
+   * Ensure all mandatory args are specified.
+   * Username and password are optional, but if one is specified, both must be
+   * specified.
+   * All other arguments are mandatory.
+   * @param parsed map of command line arguments
+   * @return true if all required arguments are present
+   */
   private static boolean valid(Map<String, String> parsed) {
     final boolean taskSpecified = parsed.get(TASK_SWITCH) != null;
     final boolean hostSpecified = parsed.get(HOST_SWITCH) != null;
     final boolean portSpecified = parsed.get(PORT_SWITCH) != null;
-    final boolean dbSpecified   = parsed.get(DB_SWITCH)  != null;
+    final boolean dbSpecified   = parsed.get(DB_SWITCH)   != null;
     final boolean credentialsSuppliedCorrectly = parsed.get(UNAME_SWITCH) != null &&
         parsed.get(PASS_SWITCH) != null;
     final boolean credentialsNotSuppliedAtAll = !parsed.containsKey(UNAME_SWITCH) &&

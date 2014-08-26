@@ -2,6 +2,9 @@ package info.bowkett.mongostats;
 
 /**
  * Created by jbowkett on 26/08/2014.
+ *
+ * Domain model object for a region's annual population growth deviation from
+ * the mean
  */
 public class RegionMeanGrowthDeviation {
   private final String country;

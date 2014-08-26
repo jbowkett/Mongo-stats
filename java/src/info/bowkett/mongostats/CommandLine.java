@@ -8,6 +8,14 @@ import java.util.Map;
  */
 public class CommandLine {
 
+  /**
+   * Parses the string array of command line arguments of the form:
+   * ["-T", "3"]
+   * into a map of the form:
+   * {"-T" => "3"}
+   * @param args
+   * @return map of switches to values
+   */
   public Map<String, String> parse(String[] args) {
     final Map<String, String> parsed = new HashMap<>();
     int index = 0;

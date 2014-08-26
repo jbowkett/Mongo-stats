@@ -8,6 +8,9 @@ import java.util.stream.Stream;
 
 /**
  * Created by jbowkett on 20/08/2014.
+ *
+ * Data Access Object for create, read and updating Regions within a MongoDB
+ * store
  */
 public class RegionDAO {
   private static final String COLLECTION_NAME = "regions";
@@ -32,15 +35,24 @@ public class RegionDAO {
     collection.insert(mapped);
   }
 
-  /*
-db.regions_3.aggregate([
-{ $unwind : "$populations" },
-{ $match : {"populations.year":2012} },
-{ $sort  : {"populations.growth":-1} },
-{ $limit : 2}
-]);  ])
+  /**
+
+   * Queries the DB and selects the regions in order of population growth from
+   * largest to smallest.  Effectively executes the following aggregation query:
+
+   db.regions_3.aggregate([
+  { $unwind : "$populations" },
+  { $match : {"populations.year":2012} },
+  { $sort  : {"populations.growth":-1} },
+  { $limit : 2}
+  ]);
+
+   *
+   * @param topNumberOfRegions - the maximum number of regions to return
+   * @param year - the year for which to calculate the population growth
+   * @return
    */
-  public List<Region> largestGrowth(int topNumberOfRegions, int year) {
+  public List<Region> getLargestGrowth(int topNumberOfRegions, int year) {
     final DBObject unwind = unwindPopulation();
     final DBObject match  = new BasicDBObject("$match", new BasicDBObject("populations.year", year));
     final DBObject sort   = new BasicDBObject("$sort",  new BasicDBObject("populations.growth", -1));
@@ -64,6 +76,7 @@ db.regions_3.aggregate([
   }
 
   /*
+
 db.regions_3.aggregate([
     { $unwind : "$populations" },
     { $match : {"populations.year": {$gt : 2008} } },
@@ -82,9 +95,37 @@ db.regions_3.aggregate([
     }
 ])
    */
+
+
+  /**
+   * Update operation to set the average (arithmetic mean) amount of growth for
+   * each region.
+   * Applies the result of the following query:
+   *
+     db.regions_3.aggregate([
+       { $unwind : "$populations" },
+       { $match : {"populations.year": {$gt : 2008} } },
+       {
+         $project : {
+           _id : 1,
+           year : "$populations.year",
+           growth : "$populations.growth"
+         }
+       },
+       {
+           $group :{
+             _id : "$_id",
+             avg_growth : { $avg: "$growth" }
+           }
+       }
+   ])
+   *
+   * @return the number of documents updated
+   */
   public int setAverageGrowthForEachRegion() {
     final DBObject unwind = unwindPopulation();
     // exclude 2008 as there is no population growth stat for the first year
+    // - this would skew the average
     final DBObject match   = excludeYear(2008);
     final DBObject project = new BasicDBObject("$project",new BasicDBObject("_id", 1).append("year", "$populations.year").append("growth", "$populations.growth"));
     final DBObject group   = new BasicDBObject("$group",  new BasicDBObject("_id", "$_id").append("avg_growth", new BasicDBObject("$avg", "$growth")));
@@ -106,42 +147,46 @@ db.regions_3.aggregate([
     return 0;
   }
 
-  /*
 
-//  this query:
-db.regions_3.aggregate([
-    { $unwind : "$populations" },
-    { $match : {"populations.year" : {$gt:2008} }  },
-    {
-      $project : {
-        _id : {
-          country : "$country",
-          region : "$region"
-        },
-        year : "$populations.year",
-        avg_growth : "$avg_growth",
-        deviation : { $subtract : ["$avg_growth", "$populations.growth"] }
-      }
-    },
-    {
-      $project : {
-        _id : "$_id",
-        year : "$year",
-        avg_growth : "$avg_growth",
-        absolute_deviation : {
-           //had to lookup how to do absolute
-           $cond: [
-             { $lt: ['$deviation', 0] },
-             { $subtract: [0, '$deviation'] },
-             '$deviation'
-           ]
-        }
-      }
-    },
-    { $sort:{_id :1, absolute_deviation:-1}  }
-])
+  /**
+   * For each region, gets the years and their absolute distance from the
+   * mean growth for that region.  Effectively runs the following query:
+   db.regions_3.aggregate([
+       { $unwind : "$populations" },
+       { $match : {"populations.year" : {$gt:2008} }  },
+       {
+         $project : {
+           _id : {
+             country : "$country",
+             region : "$region"
+           },
+           year : "$populations.year",
+           avg_growth : "$avg_growth",
+           deviation : { $subtract : ["$avg_growth", "$populations.growth"] }
+         }
+       },
+       {
+         $project : {
+           _id : "$_id",
+           year : "$year",
+           avg_growth : "$avg_growth",
+           absolute_deviation : {
+              //had to lookup how to do absolute
+              $cond: [
+                { $lt: ['$deviation', 0] },
+                { $subtract: [0, '$deviation'] },
+                '$deviation'
+              ]
+           }
+         }
+       },
+       { $sort:{_id :1, absolute_deviation:-1}  }
+   ])
+   * @param limit - the number of year records for each region to return
+   * @return an ordered list containing ordered by region and then by their
+   * absolute deviation from the mean
    */
-  public List<RegionMeanGrowthDeviation> printDeviationGrowthForEachRegion(int limit) {
+  public AbstractSequentialList<RegionMeanGrowthDeviation> getMeanGrowthDeviationForEachRegion(int limit) {
     final DBObject unwind = unwindPopulation();
     // exclude 2008 as there is no population growth stat for the first year
     final DBObject match   = excludeYear(2008);
@@ -186,6 +231,12 @@ db.regions_3.aggregate([
     return toReturn;
   }
 
+  /**
+   * utility method to make conditionals read more (Uncle Bob) "cleanly"
+   * @param previousRegion
+   * @param region
+   * @return
+   */
   private boolean newRegion(String previousRegion, String region) {
     return previousRegion == null || !previousRegion.equals(region);
   }

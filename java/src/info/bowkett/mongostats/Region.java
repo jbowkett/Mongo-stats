@@ -6,6 +6,8 @@ import java.util.Set;
 
 /**
  * Created by jbowkett on 20/08/2014.
+ *
+ * Region domain model object
  */
 public class Region {
 
